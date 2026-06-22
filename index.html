@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AWS Card Clash · 科科會搶答</title>
+<style>
+  :root{--bg:#0f1b2d;--panel:#16263d;--panel2:#1d3350;--line:#2c456b;--orange:#ff9900;--orange2:#ec7211;
+    --green:#1db954;--red:#e3463a;--txt:#eaf1fb;--muted:#9fb3cd;--gold:#ffd24a}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{background:linear-gradient(160deg,#0b1626,#0f1b2d 60%,#13243b);color:var(--txt);
+    font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;-webkit-user-select:none;user-select:none}
+  .wrap{max-width:560px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+  .screen{display:none;flex:1;flex-direction:column;padding:16px}
+  .screen.on{display:flex}
+  .logo{font-size:13px;letter-spacing:3px;color:var(--orange);font-weight:700;text-align:center;margin-top:24px}
+  h1{font-size:30px;text-align:center;margin:6px 0 2px;line-height:1.2}
+  h1 span{color:var(--orange)}
+  .sub{text-align:center;color:var(--muted);font-size:14px;margin-bottom:22px}
+  .card-box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+  input[type=text]{width:100%;padding:14px;border-radius:12px;border:1px solid var(--line);background:#0c1726;color:var(--txt);font-size:18px;text-align:center}
+  input[type=text]:focus{outline:none;border-color:var(--orange)}
+  .btn{display:block;width:100%;padding:15px;border:none;border-radius:12px;font-size:18px;font-weight:700;background:linear-gradient(135deg,var(--orange),var(--orange2));color:#1a1100;cursor:pointer;margin-top:14px}
+  .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
+  .rules{font-size:13px;color:var(--muted);line-height:1.7}
+  .rules b{color:var(--txt)}
+  .waitbig{text-align:center;font-size:22px;font-weight:800;margin-top:30px}
+  .dots:after{content:'';animation:dots 1.4s steps(4,end) infinite}
+  @keyframes dots{0%{content:''}25%{content:'·'}50%{content:'··'}75%{content:'···'}}
+
+  /* game header / timer */
+  .top{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:13px;font-weight:600}
+  .pill .v{color:var(--orange);font-weight:800}
+  .pill.score .v{color:var(--gold)}
+  .qmark{margin-left:auto;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--orange);font-weight:800;font-size:18px;cursor:pointer}
+  .timerwrap{display:flex;align-items:center;gap:10px;margin:2px 0 12px}
+  .tbar{flex:1;height:14px;border-radius:8px;background:#0c1726;border:1px solid var(--line);overflow:hidden}
+  .tbar > i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--green),#37d36a);transition:background .3s}
+  .tnum{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;min-width:2.2ch;text-align:right}
+
+  .ptitle{font-size:18px;font-weight:800;margin:2px 0 2px}
+  .pdiff{font-size:12px;color:var(--muted);margin-bottom:10px}
+  .pdiff b{color:var(--orange)}
+
+  .board{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;position:relative}
+  .row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+  .node{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;text-align:center;min-width:90px}
+  .slot{background:repeating-linear-gradient(45deg,#10233c,#10233c 8px,#14294a 8px,#14294a 16px);border:2px dashed var(--orange);border-radius:10px;padding:10px 12px;min-width:110px;text-align:center;font-size:13px;cursor:pointer;color:var(--orange);font-weight:700}
+  .slot .hint{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:2px}
+  .slot.filled{background:rgba(29,185,84,.14);border:2px solid var(--green);color:#9cf0bf;cursor:default}
+  .slot.bad{animation:shake .3s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .arrow{text-align:center;color:var(--muted);font-size:16px;margin:6px 0}
+  .lockmask{position:absolute;inset:0;background:rgba(8,16,28,.78);border-radius:16px;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:18px;font-weight:800}
+  .lockmask.on{display:flex}
+  .lockmask .s{font-size:30px;color:var(--gold);margin-top:6px}
+  .lockmask .m{font-size:13px;color:var(--muted);font-weight:500;margin-top:8px}
+
+  .handlbl{font-size:12px;color:var(--muted);margin:2px 0 8px}
+  .hand{display:flex;flex-wrap:wrap;gap:10px}
+  .gcard{flex:1 1 calc(50% - 10px);min-width:120px;background:linear-gradient(160deg,#1a2c46,#142339);border:1px solid var(--line);border-radius:12px;padding:13px 10px;text-align:center;font-size:14px;font-weight:700;cursor:pointer;position:relative}
+  .gcard:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:12px 0 0 12px;background:var(--orange)}
+  .gcard.sel{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,153,0,.3);transform:translateY(-2px)}
+  .gcard.used{display:none}
+
+  /* reveal */
+  .revtitle{font-size:20px;font-weight:800;text-align:center;margin-top:14px}
+  .ans{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;font-size:14px;line-height:1.6}
+  .ans .ok{color:#9cf0bf;font-weight:700}
+  .ans .ex{color:var(--muted);font-size:13px;margin-top:4px}
+  .src{font-size:11px;color:#6f86a6;word-break:break-all;margin-top:4px}
+  .myrow{display:flex;justify-content:space-between;font-size:16px;font-weight:800;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px}
+  .myrow .g{color:var(--gold)}
+  .bigscore{font-size:56px;font-weight:900;color:var(--gold);text-align:center;margin:10px 0 0}
+  a{color:#5fd0ff}
+
+  .toast{position:fixed;left:50%;top:16%;transform:translateX(-50%);background:#0c1726;border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+  .toast.show{opacity:1}.toast.good{border-color:var(--green);color:#9cf0bf}.toast.bad{border-color:var(--red);color:#ffb3ad}
+  .modal{position:fixed;inset:0;background:rgba(4,10,20,.7);display:none;align-items:center;justify-content:center;padding:20px;z-index:40}
+  .modal.on{display:flex}.modal .inner{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:460px}
+  .modal h3{margin:0 0 10px;color:var(--orange)}.modal p{font-size:14px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- JOIN -->
+  <section id="join" class="screen on">
+    <div class="logo">AWS CARD CLASH</div>
+    <h1>架構<span>搶答</span>對決</h1>
+    <div class="sub">科會 · 同步限時搶答</div>
+    <div class="card-box">
+      <label>輸入你的暱稱</label>
+      <input id="name" type="text" maxlength="12" placeholder="例如：小明" autocomplete="off">
+      <button class="btn" id="joinBtn">加入遊戲</button>
+    </div>
+    <div class="card-box"><div class="rules">
+      <b>怎麼玩：</b><br>
+      ① 加入後等主持人開始，所有人<b>同步同一題</b>。<br>
+      ② 每題有一條<b>倒數時間條</b>，時間到沒填完該題就 0 分。<br>
+      ③ 一題有<b>多個空格</b>：點服務卡再點空格填入。<br>
+      ④ 全部填對＋越快完成，分數越高；放錯會扣分。<br>
+      ⑤ 答完看揭曉與排名，再進下一題。
+    </div></div>
+  </section>
+
+  <!-- LOBBY (waiting) -->
+  <section id="lobby" class="screen">
+    <div class="logo">已加入</div>
+    <h1 id="hello">—</h1>
+    <div class="waitbig">等待主持人開始<span class="dots"></span></div>
+    <div class="sub" style="margin-top:18px">看大螢幕，準備好了嗎？</div>
+  </section>
+
+  <!-- GAME -->
+  <section id="game" class="screen">
+    <div class="top">
+      <div class="pill">第 <span class="v" id="pno">1</span> 題</div>
+      <div class="pill score">總分 <span class="v" id="score">0</span></div>
+      <button class="qmark" id="info">?</button>
+    </div>
+    <div class="timerwrap"><div class="tbar"><i id="tbar"></i></div><div class="tnum" id="tnum">20</div></div>
+    <div class="ptitle" id="ptitle">—</div>
+    <div class="pdiff" id="pdiff">—</div>
+    <div class="board" id="board">
+      <div class="lockmask" id="lockmask"><div id="lockttl">完成！</div><div class="s" id="lockscore">+0</div><div class="m" id="lockmsg">等待其他人與揭曉…</div></div>
+    </div>
+    <div class="handlbl">你的手牌（點選後再點空格放入）</div>
+    <div class="hand" id="hand"></div>
+  </section>
+
+  <!-- REVEAL -->
+  <section id="reveal" class="screen">
+    <div class="logo">答案揭曉</div>
+    <div class="revtitle" id="revt">—</div>
+    <div id="ansbox"></div>
+    <div class="myrow"><span id="myresult">本題 +0</span><span class="g" id="myrank">—</span></div>
+    <div class="sub" style="margin-top:14px">準備下一題<span class="dots"></span></div>
+  </section>
+
+  <!-- ENDED -->
+  <section id="ended" class="screen">
+    <div class="logo">遊戲結束</div>
+    <div class="bigscore" id="finalScore">0</div>
+    <div class="sub" id="finalRank">—</div>
+    <div class="card-box"><div class="reslist" id="reslist"></div></div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal"><div class="inner"><h3>關卡情境</h3><p id="mbody"></p>
+  <button class="btn" onclick="document.getElementById('modal').classList.remove('on')">了解</button></div></div>
+
+<script>
+/* ====== 部署後把 Apps Script /exec 網址貼到這裡（host.html 也要貼同一個） ====== */
+const API_URL = "https://script.google.com/macros/s/AKfycbx3kmyikwnjkIivpd3FSdk16Hcd2fvtUdQQnovx0-yYgHLAmM-UC8EV28BZuWFZ50Citw/exec";
+
+/* ---------- 題庫（與 host.html 相同） ---------- */
+function F(label){return {t:"f",label};}
+function S(id,hint){return {t:"s",id,hint};}
+const PUZZLES = [
+  {id:1,title:"物件儲存",diff:1,base:300,
+   scenario:"公司要存放使用者上傳的圖片、影片、備份檔，需要便宜、近乎無限容量、用 HTTP 存取的儲存服務。",
+   rows:[[F("使用者")],[S("s","儲存服務")]],answer:{s:"Amazon S3"},
+   hand:["Amazon S3","Amazon EBS","Amazon RDS","Amazon EFS"],
+   explain:{s:"S3 是物件儲存。EBS 是 EC2 的區塊磁碟、EFS 是檔案系統、RDS 是資料庫。"},
+   src:["https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"]},
+  {id:2,title:"虛擬主機",diff:1,base:300,
+   scenario:"團隊要跑傳統後端程式，需要一台可自由安裝環境、可開關機的虛擬伺服器。",
+   rows:[[F("使用者")],[S("c","執行後端程式")]],answer:{c:"Amazon EC2"},
+   hand:["Amazon EC2","AWS Lambda","Amazon S3","Amazon SQS"],
+   explain:{c:"EC2 是可完全掌控 OS 的虛擬機。Lambda 無法常駐長跑、不能自由裝環境。"},
+   src:["https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"]},
+  {id:3,title:"受管關聯式資料庫",diff:1,base:300,
+   scenario:"系統需要受管 MySQL，AWS 代為備份、修補、failover，不想自己維運。",
+   rows:[[F("應用程式")],[S("d","受管資料庫")]],answer:{d:"Amazon RDS"},
+   hand:["Amazon RDS","Amazon DynamoDB","Amazon Redshift","Amazon S3"],
+   explain:{d:"RDS 是受管關聯式資料庫。DynamoDB 是 NoSQL、Redshift 是資料倉儲。"},
+   src:["https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"]},
+  {id:4,title:"DNS 網域解析",diff:1,base:300,
+   scenario:"公司網域 example.com 要指向 AWS 上的資源，需要 DNS 服務做解析。",
+   rows:[[F("使用者：example.com")],[S("n","DNS 解析")],[F("伺服器")]],answer:{n:"Amazon Route 53"},
+   hand:["Amazon Route 53","Amazon CloudFront","AWS WAF","Amazon VPC"],
+   explain:{n:"Route 53 是 AWS 的 DNS 服務。"},
+   src:["https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html"]},
+  {id:5,title:"權限管理",diff:1,base:300,
+   scenario:"要控制「誰能存取哪些 AWS 資源」，建立使用者、群組、角色與權限政策。",
+   rows:[[F("人 / 服務")],[S("i","驗證身分與權限")],[F("AWS 資源")]],answer:{i:"AWS IAM"},
+   hand:["AWS IAM","Amazon Cognito","AWS KMS","Amazon GuardDuty"],
+   explain:{i:"IAM 管 AWS 帳號內部身分與權限；Cognito 是給 app 終端使用者登入的（見第 10 題）。"},
+   src:["https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html"]},
+  {id:6,title:"靜態網站 + CDN",diff:2,base:500,
+   scenario:"要部署全球都快的靜態網站。檔案要有來源儲存，前面要 CDN 做邊緣快取與加速。",
+   rows:[[F("全球使用者")],[S("cdn","CDN 邊緣快取")],[S("store","靜態檔案來源")]],
+   answer:{cdn:"Amazon CloudFront",store:"Amazon S3"},
+   hand:["Amazon CloudFront","Amazon S3","Amazon EC2","Elastic Load Balancing","AWS Global Accelerator"],
+   explain:{cdn:"CloudFront 是 CDN，在全球邊緣節點快取。",store:"S3 放靜態檔，是官方建議的安全靜態網站組合。"},
+   src:["https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/getting-started-secure-static-website-cloudformation-template.html"]},
+  {id:7,title:"圖片上傳自動處理",diff:2,base:500,
+   scenario:"使用者上傳原圖到 S3，要自動產生縮圖存到另一個 bucket，不想開常駐伺服器。",
+   rows:[[F("上傳原圖")],[F("S3（來源）")],[S("fn","事件觸發、處理縮圖")],[F("S3（輸出）")]],answer:{fn:"AWS Lambda"},
+   hand:["AWS Lambda","Amazon EC2","AWS Batch","Amazon RDS"],
+   explain:{fn:"S3 上傳事件可觸發 Lambda，無伺服器、按執行計費、自動擴展。"},
+   src:["https://docs.aws.amazon.com/lambda/latest/dg/with-s3-example.html"]},
+  {id:8,title:"負載平衡 + 自動擴展",diff:2,base:500,
+   scenario:"流量高低起伏。多台 EC2 要平均分流並做健康檢查，且台數要依負載自動增減。",
+   rows:[[F("使用者")],[S("lb","分流 + 健康檢查")],[S("asg","一群 EC2，依負載自動增減")]],
+   answer:{lb:"Elastic Load Balancing",asg:"EC2 Auto Scaling"},
+   hand:["Elastic Load Balancing","EC2 Auto Scaling","Amazon CloudFront","Amazon Route 53","AWS Lambda"],
+   explain:{lb:"ALB 在多台 EC2 間分流與健康檢查。",asg:"Auto Scaling 依指標自動增減台數。"},
+   src:["https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"]},
+  {id:9,title:"資料庫高可用（含陷阱）",diff:3,base:800,
+   scenario:"三層式架構，資料庫放私有子網路。要求主庫故障時，能自動切換到另一可用區的備援、近乎零中斷。注意：Read Replica 是分擔讀取用的，不會自動切換！",
+   rows:[[F("ALB（公有子網）")],[F("EC2 App 層（私有子網）")],[S("p","主資料庫"),S("standby","自動接手的備援")]],
+   answer:{p:"RDS 主資料庫",standby:"RDS Multi-AZ 待命副本"},
+   hand:["RDS 主資料庫","RDS Multi-AZ 待命副本","Read Replica 唯讀副本","每日 S3 備份","第二台 EC2"],
+   explain:{p:"主庫放私有子網路（無對外路由）符合最小暴露面。",standby:"Multi-AZ 待命副本在另一可用區同步，主庫故障自動 failover；Read Replica 不會自動切換，是經典陷阱。"},
+   src:["https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-example-web-database-servers.html"]},
+  {id:10,title:"無伺服器 Web App",diff:3,base:800,
+   scenario:"全無伺服器架構，前面是 API Gateway。要替終端使用者做登入、要無伺服器運算、要能隨流量自動擴展的資料庫。注意：IAM 是管 AWS 內部權限的，不是 app 登入；RDS 在大量 Lambda 並發下易耗盡連線。",
+   rows:[[F("使用者")],[S("auth","終端使用者登入")],[F("API Gateway")],[S("fn","無伺服器運算")],[S("db","自動擴展的資料庫")]],
+   answer:{auth:"Amazon Cognito",fn:"AWS Lambda",db:"Amazon DynamoDB"},
+   hand:["Amazon Cognito","AWS Lambda","Amazon DynamoDB","AWS IAM","Amazon RDS","Amazon EC2"],
+   explain:{auth:"Cognito 提供 app 終端使用者註冊/登入。",fn:"Lambda 無伺服器運算。",db:"DynamoDB 無伺服器、自動擴展，是 Lambda 最佳拍檔。"},
+   src:["https://aws.amazon.com/lambda/resources/refarch/refarch-webapp/"]},
+];
+function slotCount(p){return Object.keys(p.answer).length;}
+function roundSecs(p){return 20+(slotCount(p)-1)*5;}  // 20s起，每多一格+5s
+
+/* ---------- 狀態 ---------- */
+let player="", total=0, offset=0;
+let curRound=-1, finalized=false, revealedFor=-1, endedShown=false;
+let startMs=0, durMs=0, placed=0, wrongCnt=0, completeLeft=0, scoreThis=0, sel=null, rafId=0;
+const roundLog=[];
+
+const $=s=>document.querySelector(s);
+const show=id=>{document.querySelectorAll('.screen').forEach(e=>e.classList.remove('on'));$('#'+id).classList.add('on');};
+function beep(ok){try{const a=new(window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=ok?880:220;g.gain.value=.05;o.start();o.stop(a.currentTime+.12);}catch(e){}}
+function toast(m,ok){const t=$('#toast');t.textContent=m;t.className='toast show '+(ok?'good':'bad');setTimeout(()=>t.classList.remove('show'),900);}
+function esc(s){return String(s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+
+$('#joinBtn').onclick=()=>{
+  const n=$('#name').value.trim();
+  if(!n){toast('請先輸入暱稱',false);return;}
+  player=n; total=0; $('#score').textContent='0';
+  $('#hello').innerHTML='哈囉，<span>'+esc(n)+'</span>';
+  submit();                 // 先登記名字（0分）到排行榜
+  show('lobby');
+  poll(); setInterval(poll,1200);
+};
+$('#info').onclick=()=>{const p=PUZZLES[curRound];if(!p)return;$('#mbody').textContent=p.scenario;$('#modal').classList.add('on');};
+
+/* ---------- 輪詢狀態 ---------- */
+function poll(){ jsonp(API_URL+'?action=state', st=>{ if(st) handleState(st); }); }
+function handleState(st){
+  offset = st.serverNow - Date.now();
+  if(st.phase==='lobby'){ if(curRound!==-1){curRound=-1;} if(!$('#lobby').classList.contains('on')&&!$('#ended').classList.contains('on'))show('lobby'); }
+  else if(st.phase==='question'){ if(st.round!==curRound) beginRound(st.round, st.startMs, st.duration); }
+  else if(st.phase==='reveal'){ if(revealedFor!==st.round) doReveal(st.round); }
+  else if(st.phase==='ended'){ if(!endedShown) endGame(); }
+}
+
+/* ---------- 開始一題 ---------- */
+function beginRound(round,sMs,durSec){
+  curRound=round; revealedFor=-1; finalized=false; placed=0; wrongCnt=0; scoreThis=0; sel=null;
+  startMs=sMs; durMs=(durSec||roundSecs(PUZZLES[round]))*1000;
+  const p=PUZZLES[round];
+  $('#pno').textContent=p.id;
+  $('#ptitle').textContent=p.title;
+  $('#pdiff').innerHTML='難度：<b>'+['','入門','架構模式','進階取捨'][p.diff]+'</b>　底分 '+p.base+'　空格 '+slotCount(p);
+  $('#lockmask').classList.remove('on');
+  // board
+  const b=$('#board'); b.querySelectorAll('.row,.arrow').forEach(e=>e.remove());
+  const mask=$('#lockmask');
+  p.rows.forEach((row,ri)=>{
+    if(ri>0){const a=document.createElement('div');a.className='arrow';a.textContent='↓';b.insertBefore(a,mask);}
+    const r=document.createElement('div');r.className='row';
+    row.forEach(cell=>{
+      const el=document.createElement('div');
+      if(cell.t==='f'){el.className='node';el.textContent=cell.label;}
+      else{el.className='slot';el.dataset.slot=cell.id;el.innerHTML='填入服務'+(cell.hint?('<span class="hint">'+cell.hint+'</span>'):'');el.onclick=()=>placeOn(cell.id,el);}
+      r.appendChild(el);
+    });
+    b.insertBefore(r,mask);
+  });
+  // hand
+  const h=$('#hand');h.innerHTML='';
+  shuffle(p.hand.slice()).forEach(name=>{
+    const c=document.createElement('div');c.className='gcard';c.textContent=name;c.dataset.card=name;
+    c.onclick=()=>{if(finalized)return;document.querySelectorAll('.gcard').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');sel=name;};
+    h.appendChild(c);
+  });
+  show('game');
+  cancelAnimationFrame(rafId); tick();
+}
+
+function tick(){
+  const now=Date.now()+offset;
+  let left=startMs+durMs-now;
+  if(left<0)left=0;
+  const frac=durMs?left/durMs:0;
+  $('#tbar').style.width=(frac*100)+'%';
+  $('#tbar').style.background=frac>.5?'linear-gradient(90deg,#1db954,#37d36a)':frac>.25?'linear-gradient(90deg,#ff9900,#ffb84d)':'linear-gradient(90deg,#e3463a,#ff6a5e)';
+  $('#tnum').textContent=Math.ceil(left/1000);
+  if(left<=0){ if(!finalized) finalizeRound(false); return; }
+  rafId=requestAnimationFrame(tick);
+}
+
+/* ---------- 放卡 ---------- */
+function placeOn(slotId,el){
+  if(finalized||el.classList.contains('filled'))return;
+  if(!sel){toast('先點選一張手牌',false);return;}
+  const p=PUZZLES[curRound];
+  if(p.answer[slotId]===sel){
+    el.classList.add('filled');el.innerHTML='✓ '+sel;el.onclick=null;
+    const card=document.querySelector('.gcard[data-card="'+CSS.escape(sel)+'"]');if(card)card.classList.add('used');
+    beep(true);sel=null;placed++;
+    if(placed===slotCount(p)){completeLeft=Math.max(0,startMs+durMs-(Date.now()+offset));finalizeRound(true);}
+  }else{
+    wrongCnt++;el.classList.add('bad');setTimeout(()=>el.classList.remove('bad'),300);
+    document.querySelectorAll('.gcard').forEach(x=>x.classList.remove('sel'));sel=null;beep(false);toast('放錯了，扣分',false);
+  }
+}
+
+/* ---------- 結算一題 ---------- */
+function finalizeRound(done){
+  if(finalized)return; finalized=true; cancelAnimationFrame(rafId);
+  const p=PUZZLES[curRound], T=slotCount(p);
+  let sc;
+  if(done){ sc=Math.round(p.base*0.6 + p.base*0.4*(completeLeft/durMs)); }
+  else { sc=Math.round(p.base*0.5*placed/T); }
+  sc=Math.max(0, sc - wrongCnt*40);
+  scoreThis=sc; total+=sc; $('#score').textContent=total;
+  roundLog.push({id:p.id,title:p.title,sc,done,placed,T});
+  submit();
+  $('#lockttl').textContent=done?'完成！':'時間到';
+  $('#lockscore').textContent='+'+sc;
+  $('#lockmsg').textContent=done?'等待其他人與揭曉…':(placed+'/'+T+' 格正確');
+  $('#lockmask').classList.add('on');
+}
+
+/* ---------- 揭曉 ---------- */
+function doReveal(round){
+  revealedFor=round; const p=PUZZLES[round];
+  if(curRound!==round){curRound=round;}      // 防止中途加入者
+  $('#revt').textContent='第 '+p.id+' 題 · '+p.title;
+  const ab=$('#ansbox');ab.innerHTML='';
+  Object.keys(p.answer).forEach(k=>{
+    const d=document.createElement('div');d.className='ans';
+    d.innerHTML='<span class="ok">✓ '+esc(p.answer[k])+'</span><div class="ex">'+esc(p.explain[k]||'')+'</div>';
+    ab.appendChild(d);
+  });
+  const s=document.createElement('div');s.className='src';
+  s.innerHTML='官方來源：'+p.src.map(u=>'<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>').join('<br>');
+  ab.appendChild(s);
+  $('#myresult').textContent='本題 +'+scoreThis;
+  jsonp(API_URL+'?action=top',rows=>{
+    if(!rows){$('#myrank').textContent='';return;}
+    rows.sort((a,b)=>b.score-a.score);
+    const i=rows.findIndex(r=>r.name===player);
+    $('#myrank').textContent=i>=0?('目前第 '+(i+1)+' 名 / '+rows.length+' 人'):('總分 '+total);
+  });
+  show('reveal');
+}
+
+/* ---------- 結束 ---------- */
+function endGame(){
+  endedShown=true;
+  $('#finalScore').textContent=total;
+  jsonp(API_URL+'?action=top',rows=>{
+    if(rows){rows.sort((a,b)=>b.score-a.score);const i=rows.findIndex(r=>r.name===player);
+      $('#finalRank').textContent=i>=0?('🏅 第 '+(i+1)+' 名 / '+rows.length+' 人'):('總分 '+total);}
+  });
+  const rl=$('#reslist');rl.innerHTML='';
+  roundLog.forEach(r=>{const d=document.createElement('div');d.className='myrow';d.style.fontSize='14px';d.style.marginTop='8px';
+    d.innerHTML='<span>第'+r.id+'題 '+esc(r.title)+'</span><span class="g">+'+r.sc+'</span>';rl.appendChild(d);});
+  show('ended');
+}
+
+/* ---------- 後端 ---------- */
+function submit(){
+  if(API_URL.indexOf('PASTE_')===0){console.log('[demo] '+player+' = '+total);return;}
+  jsonp(API_URL+'?action=submit&name='+encodeURIComponent(player)+'&score='+total,()=>{});
+}
+function jsonp(url,cb){
+  if(API_URL.indexOf('PASTE_')===0){demoState(url,cb);return;}
+  const name='cb_'+Date.now()+Math.floor(Math.random()*99999);
+  window[name]=d=>{try{cb&&cb(d);}finally{delete window[name];s.remove();}};
+  const s=document.createElement('script');
+  s.src=url+(url.indexOf('?')>=0?'&':'?')+'callback='+name+'&_='+Date.now();
+  s.onerror=()=>{cb&&cb(null);delete window[name];s.remove();};
+  document.body.appendChild(s);
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ---------- 單機示範（沒設定網址時可一個人測流程） ---------- */
+let demoRound=0,demoPhase='lobby',demoStart=0;
+function demoState(url,cb){
+  if(url.indexOf('action=state')>=0){
+    if(demoPhase==='lobby'){setTimeout(()=>{demoPhase='question';demoStart=Date.now();},1500);}
+    else if(demoPhase==='question'&&Date.now()-demoStart>roundSecs(PUZZLES[demoRound])*1000+1500){demoPhase='reveal';demoRevAt=Date.now();}
+    else if(demoPhase==='reveal'&&Date.now()-demoRevAt>4000){demoRound++;if(demoRound>=PUZZLES.length){demoPhase='ended';}else{demoPhase='question';demoStart=Date.now();}}
+    cb&&cb({phase:demoPhase,round:Math.min(demoRound,PUZZLES.length-1),startMs:demoStart,duration:roundSecs(PUZZLES[Math.min(demoRound,PUZZLES.length-1)]),serverNow:Date.now()});
+  } else if(url.indexOf('action=top')>=0){ cb&&cb([{name:player,score:total}]); }
+  else { cb&&cb({ok:true}); }
+}
+let demoRevAt=0;
+</script>
+</body>
+</html>
