@@ -26,6 +26,8 @@
   /* lobby */
   .lobbybox{text-align:center;padding:6vh 2vw}
   .joinurl{font-size:clamp(18px,2.2vw,34px);font-weight:800;color:var(--gold);margin:2vh 0;word-break:break-all}
+  .qrbox{display:inline-block;background:#fff;padding:14px;border-radius:16px;margin:1vh 0}
+  .qrbox img{display:block;width:clamp(180px,22vw,300px);height:clamp(180px,22vw,300px)}
   .hint{color:var(--muted);font-size:clamp(14px,1.4vw,20px);line-height:1.8}
   .count{font-size:clamp(40px,6vw,90px);font-weight:900;color:var(--green)}
 
@@ -80,7 +82,8 @@
 
   <!-- LOBBY -->
   <div id="lobby" class="panel lobbybox">
-    <div class="hint">請玩家用手機開啟（或掃 QR code）：</div>
+    <div class="hint">請玩家用手機掃描下方 QR code 加入：</div>
+    <div class="qrbox" id="qrbox" style="display:none"><img id="qrimg" alt="QR code"></div>
     <div class="joinurl" id="joinurl">（把玩家入口網址填到下方程式或這裡）</div>
     <div class="count" id="lobbyCount">0</div>
     <div class="hint">人已加入 · 按右上「開始遊戲」啟動</div>
@@ -198,7 +201,11 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
 let running=false, rafId=0;
 
-if(PLAYER_URL) $('#joinurl').textContent=PLAYER_URL;
+if(PLAYER_URL){
+  $('#joinurl').textContent=PLAYER_URL;
+  $('#qrimg').src='https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&data='+encodeURIComponent(PLAYER_URL);
+  $('#qrbox').style.display='inline-block';
+}
 
 /* ---------- 主流程 ---------- */
 $('#startBtn').onclick=async()=>{
