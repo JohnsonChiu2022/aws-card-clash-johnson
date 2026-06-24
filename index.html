@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AWS Card Clash · 科會搶答</title>
+<title>Architecture Clash · AWS vs GCP</title>
 <style>
   :root{--bg:#0f1b2d;--panel:#16263d;--panel2:#1d3350;--line:#2c456b;--orange:#ff9900;--orange2:#ec7211;
     --green:#1db954;--red:#e3463a;--txt:#eaf1fb;--muted:#9fb3cd;--gold:#ffd24a}
@@ -29,9 +29,8 @@
   .rules b{color:var(--txt)}
   .waitbig{text-align:center;font-size:22px;font-weight:800;margin-top:30px}
   .dots:after{content:'';animation:dots 1.4s steps(4,end) infinite}
-  @keyframes dots{0%{content:''}25%{content:'·'}50%{content:'··'}75%{content:'···'}}
+  @keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
 
-  /* game header / timer */
   .top{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
   .pill{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:13px;font-weight:600}
   .pill .v{color:var(--orange);font-weight:800}
@@ -45,11 +44,14 @@
   .ptitle{font-size:18px;font-weight:800;margin:2px 0 2px}
   .pdiff{font-size:12px;color:var(--muted);margin-bottom:10px}
   .pdiff b{color:var(--orange)}
+  .badge{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;margin-right:6px}
+  .badge.aws{background:#3a2c08;color:#ffb84d;border:1px solid #ff9900}
+  .badge.gcp{background:#0e2a3f;color:#7cc0ff;border:1px solid #4285f4}
 
   .board{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;position:relative}
   .row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
   .node{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;text-align:center;min-width:90px}
-  .slot{background:repeating-linear-gradient(45deg,#10233c,#10233c 8px,#14294a 8px,#14294a 16px);border:2px dashed var(--orange);border-radius:10px;padding:10px 12px;min-width:110px;text-align:center;font-size:13px;cursor:pointer;color:var(--orange);font-weight:700}
+  .slot{background:repeating-linear-gradient(45deg,#10233c,#10233c 8px,#14294a 8px,#14294a 16px);border:2px dashed var(--orange);border-radius:10px;padding:10px 12px;min-width:120px;text-align:center;font-size:13px;cursor:pointer;color:var(--orange);font-weight:700}
   .slot .hint{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:2px}
   .slot.filled{background:rgba(29,185,84,.14);border:2px solid var(--green);color:#9cf0bf;cursor:default}
   .slot.bad{animation:shake .3s}
@@ -67,7 +69,6 @@
   .gcard.sel{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,153,0,.3);transform:translateY(-2px)}
   .gcard.used{display:none}
 
-  /* reveal */
   .revtitle{font-size:20px;font-weight:800;text-align:center;margin-top:14px}
   .ans{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;font-size:14px;line-height:1.6}
   .ans .ok{color:#9cf0bf;font-weight:700}
@@ -90,61 +91,61 @@
 
   <!-- JOIN -->
   <section id="join" class="screen on">
-    <div class="logo">AWS CARD CLASH</div>
-    <h1>架構<span>搶答</span>對決</h1>
-    <div class="sub">科會 · 同步限時搶答</div>
+    <div class="logo">ARCHITECTURE CLASH</div>
+    <h1>Architecture <span>Design</span> Battle</h1>
+    <div class="sub">Live timed quiz · AWS &amp; GCP</div>
     <div class="card-box">
-      <label>輸入你的暱稱</label>
-      <input id="name" type="text" maxlength="12" placeholder="例如：小明" autocomplete="off">
-      <button class="btn" id="joinBtn">加入遊戲</button>
+      <label>Enter your nickname</label>
+      <input id="name" type="text" maxlength="14" placeholder="e.g. Alex" autocomplete="off">
+      <button class="btn" id="joinBtn">Join game</button>
     </div>
     <div class="card-box"><div class="rules">
-      <b>怎麼玩：</b><br>
-      ① 加入後等主持人開始，所有人<b>同步同一題</b>。<br>
-      ② 每題有一條<b>倒數時間條</b>，時間到沒填完該題就 0 分。<br>
-      ③ 一題有<b>多個空格</b>：點服務卡再點空格填入。<br>
-      ④ 全部填對＋越快完成，分數越高；放錯會扣分。<br>
-      ⑤ 答完看揭曉與排名，再進下一題。
+      <b>How to play:</b><br>
+      1. After joining, wait for the host. Everyone gets the <b>same question at the same time</b>.<br>
+      2. Each question has a <b>countdown bar</b>. If time runs out before you finish, you score 0 for it.<br>
+      3. A question has <b>multiple slots</b>: tap a service card, then tap a slot.<br>
+      4. Fill every slot correctly &amp; fast for more points; wrong placements lose points.<br>
+      5. See the answer and your rank, then the next question.
     </div></div>
   </section>
 
-  <!-- LOBBY (waiting) -->
+  <!-- LOBBY -->
   <section id="lobby" class="screen">
-    <div class="logo">已加入</div>
+    <div class="logo">JOINED</div>
     <h1 id="hello">—</h1>
-    <div class="waitbig">等待主持人開始<span class="dots"></span></div>
-    <div class="sub" style="margin-top:18px">看大螢幕，準備好了嗎？</div>
+    <div class="waitbig">Waiting for the host<span class="dots"></span></div>
+    <div class="sub" style="margin-top:18px">Watch the big screen — get ready!</div>
   </section>
 
   <!-- GAME -->
   <section id="game" class="screen">
     <div class="top">
-      <div class="pill">第 <span class="v" id="pno">1</span> 題</div>
-      <div class="pill score">總分 <span class="v" id="score">0</span></div>
+      <div class="pill">Q <span class="v" id="pno">1</span></div>
+      <div class="pill score">Score <span class="v" id="score">0</span></div>
       <button class="qmark" id="info">?</button>
     </div>
     <div class="timerwrap"><div class="tbar"><i id="tbar"></i></div><div class="tnum" id="tnum">20</div></div>
     <div class="ptitle" id="ptitle">—</div>
     <div class="pdiff" id="pdiff">—</div>
     <div class="board" id="board">
-      <div class="lockmask" id="lockmask"><div id="lockttl">完成！</div><div class="s" id="lockscore">+0</div><div class="m" id="lockmsg">等待其他人與揭曉…</div></div>
+      <div class="lockmask" id="lockmask"><div id="lockttl">Done!</div><div class="s" id="lockscore">+0</div><div class="m" id="lockmsg">Waiting for others…</div></div>
     </div>
-    <div class="handlbl">你的手牌（點選後再點空格放入）</div>
+    <div class="handlbl">Your cards (tap a card, then tap a slot)</div>
     <div class="hand" id="hand"></div>
   </section>
 
   <!-- REVEAL -->
   <section id="reveal" class="screen">
-    <div class="logo">答案揭曉</div>
+    <div class="logo">ANSWER</div>
     <div class="revtitle" id="revt">—</div>
     <div id="ansbox"></div>
-    <div class="myrow"><span id="myresult">本題 +0</span><span class="g" id="myrank">—</span></div>
-    <div class="sub" style="margin-top:14px">準備下一題<span class="dots"></span></div>
+    <div class="myrow"><span id="myresult">This round +0</span><span class="g" id="myrank">—</span></div>
+    <div class="sub" style="margin-top:14px">Next question<span class="dots"></span></div>
   </section>
 
   <!-- ENDED -->
   <section id="ended" class="screen">
-    <div class="logo">遊戲結束</div>
+    <div class="logo">GAME OVER</div>
     <div class="bigscore" id="finalScore">0</div>
     <div class="sub" id="finalRank">—</div>
     <div class="card-box"><div class="reslist" id="reslist"></div></div>
@@ -152,168 +153,183 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="modal" id="modal"><div class="inner"><h3>關卡情境</h3><p id="mbody"></p>
-  <button class="btn" onclick="document.getElementById('modal').classList.remove('on')">了解</button></div></div>
+<div class="modal" id="modal"><div class="inner"><h3>Scenario</h3><p id="mbody"></p>
+  <button class="btn" onclick="document.getElementById('modal').classList.remove('on')">Got it</button></div></div>
 
 <script>
-/* ====== 部署後把 Apps Script /exec 網址貼到這裡（host.html 也要貼同一個） ====== */
+/* ====== Paste your Apps Script /exec URL here (host.html must use the SAME URL) ====== */
 const API_URL = "https://script.google.com/macros/s/AKfycbx3kmyikwnjkIivpd3FSdk16Hcd2fvtUdQQnovx0-yYgHLAmM-UC8EV28BZuWFZ50Citw/exec";
 
-/* ---------- 題庫（與 host.html 相同） ---------- */
+/* ---------- Question bank (must match host.html) ---------- */
 function F(label){return {t:"f",label};}
 function S(id,hint){return {t:"s",id,hint};}
 const PUZZLES = [
-  {id:1,title:"物件儲存",diff:1,base:300,
-   scenario:"公司要存放使用者上傳的圖片、影片、備份檔，需要便宜、近乎無限容量、用 HTTP 存取的儲存服務。",
-   rows:[[F("使用者")],[S("s","儲存服務")]],answer:{s:"Amazon S3"},
-   hand:["Amazon S3","Amazon EBS","Amazon RDS","Amazon EFS"],
-   explain:{s:"S3 是物件儲存。EBS 是 EC2 的區塊磁碟、EFS 是檔案系統、RDS 是資料庫。"},
-   src:["https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"]},
-  {id:2,title:"虛擬主機",diff:1,base:300,
-   scenario:"團隊要跑傳統後端程式，需要一台可自由安裝環境、可開關機的虛擬伺服器。",
-   rows:[[F("使用者")],[S("c","執行後端程式")]],answer:{c:"Amazon EC2"},
-   hand:["Amazon EC2","AWS Lambda","Amazon S3","Amazon SQS"],
-   explain:{c:"EC2 是可完全掌控 OS 的虛擬機。Lambda 無法常駐長跑、不能自由裝環境。"},
-   src:["https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"]},
-  {id:3,title:"受管關聯式資料庫",diff:1,base:300,
-   scenario:"系統需要受管 MySQL，AWS 代為備份、修補、failover，不想自己維運。",
-   rows:[[F("應用程式")],[S("d","受管資料庫")]],answer:{d:"Amazon RDS"},
-   hand:["Amazon RDS","Amazon DynamoDB","Amazon Redshift","Amazon S3"],
-   explain:{d:"RDS 是受管關聯式資料庫。DynamoDB 是 NoSQL、Redshift 是資料倉儲。"},
-   src:["https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"]},
-  {id:4,title:"DNS 網域解析",diff:1,base:300,
-   scenario:"公司網域 example.com 要指向 AWS 上的資源，需要 DNS 服務做解析。",
-   rows:[[F("使用者：example.com")],[S("n","DNS 解析")],[F("伺服器")]],answer:{n:"Amazon Route 53"},
-   hand:["Amazon Route 53","Amazon CloudFront","AWS WAF","Amazon VPC"],
-   explain:{n:"Route 53 是 AWS 的 DNS 服務。"},
-   src:["https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html"]},
-  {id:5,title:"權限管理",diff:1,base:300,
-   scenario:"要控制「誰能存取哪些 AWS 資源」，建立使用者、群組、角色與權限政策。",
-   rows:[[F("人 / 服務")],[S("i","驗證身分與權限")],[F("AWS 資源")]],answer:{i:"AWS IAM"},
-   hand:["AWS IAM","Amazon Cognito","AWS KMS","Amazon GuardDuty"],
-   explain:{i:"IAM 管 AWS 帳號內部身分與權限；Cognito 是給 app 終端使用者登入的（見第 10 題）。"},
-   src:["https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html"]},
-  {id:6,title:"靜態網站 + CDN",diff:2,base:500,
-   scenario:"要部署全球都快的靜態網站。檔案要有來源儲存，前面要 CDN 做邊緣快取與加速。",
-   rows:[[F("全球使用者")],[S("cdn","CDN 邊緣快取")],[S("store","靜態檔案來源")]],
-   answer:{cdn:"Amazon CloudFront",store:"Amazon S3"},
-   hand:["Amazon CloudFront","Amazon S3","Amazon EC2","Elastic Load Balancing","AWS Global Accelerator"],
-   explain:{cdn:"CloudFront 是 CDN，在全球邊緣節點快取。",store:"S3 放靜態檔，是官方建議的安全靜態網站組合。"},
-   src:["https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/getting-started-secure-static-website-cloudformation-template.html"]},
-  {id:7,title:"圖片上傳自動處理",diff:2,base:500,
-   scenario:"使用者上傳原圖到 S3，要自動產生縮圖存到另一個 bucket，不想開常駐伺服器。",
-   rows:[[F("上傳原圖")],[F("S3（來源）")],[S("fn","事件觸發、處理縮圖")],[F("S3（輸出）")]],answer:{fn:"AWS Lambda"},
-   hand:["AWS Lambda","Amazon EC2","AWS Batch","Amazon RDS"],
-   explain:{fn:"S3 上傳事件可觸發 Lambda，無伺服器、按執行計費、自動擴展。"},
-   src:["https://docs.aws.amazon.com/lambda/latest/dg/with-s3-example.html"]},
-  {id:8,title:"負載平衡 + 自動擴展",diff:2,base:500,
-   scenario:"流量高低起伏。多台 EC2 要平均分流並做健康檢查，且台數要依負載自動增減。",
-   rows:[[F("使用者")],[S("lb","分流 + 健康檢查")],[S("asg","一群 EC2，依負載自動增減")]],
-   answer:{lb:"Elastic Load Balancing",asg:"EC2 Auto Scaling"},
-   hand:["Elastic Load Balancing","EC2 Auto Scaling","Amazon CloudFront","Amazon Route 53","AWS Lambda"],
-   explain:{lb:"ALB 在多台 EC2 間分流與健康檢查。",asg:"Auto Scaling 依指標自動增減台數。"},
-   src:["https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html",
-        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"]},
-  {id:9,title:"資料庫高可用（含陷阱）",diff:3,base:800,
-   scenario:"三層式架構，資料庫放私有子網路。要求主庫故障時，能自動切換到另一可用區的備援、近乎零中斷。注意：Read Replica 是分擔讀取用的，不會自動切換！",
-   rows:[[F("ALB（公有子網）")],[F("EC2 App 層（私有子網）")],[S("p","主資料庫"),S("standby","自動接手的備援")]],
-   answer:{p:"RDS (Primary)",standby:"RDS Multi-AZ Standby"},
-   hand:["RDS (Primary)","RDS Multi-AZ Standby","Read Replica","Daily S3 Backup","2nd EC2 instance"],
-   explain:{p:"主庫放私有子網路（無對外路由）符合最小暴露面。",standby:"RDS Multi-AZ Standby 在另一可用區同步，主庫故障自動 failover；Read Replica 是分擔讀取、不會自動切換，是經典陷阱。"},
-   src:["https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html",
-        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-example-web-database-servers.html"]},
-  {id:10,title:"無伺服器 Web App",diff:3,base:800,
-   scenario:"全無伺服器架構，前面是 API Gateway。要替終端使用者做登入、要無伺服器運算、要能隨流量自動擴展的資料庫。注意：IAM 是管 AWS 內部權限的，不是 app 登入；RDS 在大量 Lambda 並發下易耗盡連線。",
-   rows:[[F("使用者")],[S("auth","終端使用者登入")],[F("API Gateway")],[S("fn","無伺服器運算")],[S("db","自動擴展的資料庫")]],
-   answer:{auth:"Amazon Cognito",fn:"AWS Lambda",db:"Amazon DynamoDB"},
-   hand:["Amazon Cognito","AWS Lambda","Amazon DynamoDB","AWS IAM","Amazon RDS","Amazon EC2"],
-   explain:{auth:"Cognito 提供 app 終端使用者註冊/登入。",fn:"Lambda 無伺服器運算。",db:"DynamoDB 無伺服器、自動擴展，是 Lambda 最佳拍檔。"},
-   src:["https://aws.amazon.com/lambda/resources/refarch/refarch-webapp/"]},
-
-  {id:11,title:"削峰非同步處理",diff:3,base:800,
-   scenario:"尖峰時大量請求湧入，要先緩衝、再由後端非同步逐筆處理，避免請求遺失或壓垮後端。",
-   rows:[[F("API Gateway")],[S("q","訊息緩衝佇列")],[S("w","逐筆處理的運算")]],
+  /* ===================== AWS (1-10) ===================== */
+  {id:1,cloud:"AWS",base:800,title:"Decouple & buffer traffic spikes",
+   scenario:"A write-heavy API gets sudden traffic spikes. You must buffer incoming requests and let the backend process them asynchronously at its own pace, without losing requests.",
+   rows:[[F("API Gateway")],[S("q","Buffering queue")],[S("w","Async worker (serverless)")]],
    answer:{q:"Amazon SQS",w:"AWS Lambda"},
    hand:["Amazon SQS","AWS Lambda","Amazon SNS","Amazon Kinesis Data Streams","Amazon EC2"],
-   explain:{q:"SQS 佇列緩衝削峰、確保訊息不遺失；SNS 是 pub/sub 通知、不做佇列緩衝。",w:"Lambda 由 SQS 觸發、自動擴展逐筆處理。"},
+   explain:{q:"SQS buffers and decouples, guaranteeing delivery; SNS is pub/sub, not a buffering queue.",w:"Lambda is triggered by SQS and scales automatically per message."},
    src:["https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html"]},
 
-  {id:12,title:"一對多扇出通知",diff:3,base:800,
-   scenario:"一個事件要同時通知多個下游（多個佇列、Email），各下游互不影響。",
-   rows:[[F("發布者 (事件)")],[S("t","一對多扇出主題")],[S("s","其中一個訂閱的佇列")]],
+  {id:2,cloud:"AWS",base:800,title:"Fan-out an event to many consumers",
+   scenario:"One event must notify several independent downstream consumers (multiple queues, email) without them affecting each other.",
+   rows:[[F("Publisher (event)")],[S("t","Fan-out topic")],[S("s","One subscribing queue")]],
    answer:{t:"Amazon SNS",s:"Amazon SQS"},
    hand:["Amazon SNS","Amazon SQS","Amazon EventBridge","Amazon Kinesis Data Streams","Amazon S3"],
-   explain:{t:"SNS 是 pub/sub 主題，一則訊息扇出給多個訂閱者。",s:"經典 fan-out：SNS 後接多個 SQS 佇列各自消化。"},
+   explain:{t:"SNS is a pub/sub topic: one message fans out to many subscribers.",s:"Classic fan-out: SNS in front of multiple SQS queues, each consumed independently."},
    src:["https://docs.aws.amazon.com/sns/latest/dg/welcome.html"]},
 
-  {id:13,title:"即時串流分析",diff:3,base:800,
-   scenario:"IoT 裝置每秒送大量事件，要能即時處理且可重播；另外要近即時把原始資料落地到 S3。",
-   rows:[[F("IoT 裝置 (大量事件)")],[S("in","可重播的即時串流")],[S("del","近即時遞送落地")],[F("Amazon S3")]],
+  {id:3,cloud:"AWS",base:800,title:"Real-time stream with replay + landing",
+   scenario:"IoT devices emit huge event volumes. You need real-time, replayable ingestion, plus near-real-time delivery of the raw data into object storage.",
+   rows:[[F("IoT devices")],[S("in","Replayable real-time stream")],[S("del","Near-real-time delivery")],[F("Amazon S3")]],
    answer:{in:"Amazon Kinesis Data Streams",del:"Amazon Data Firehose"},
    hand:["Amazon Kinesis Data Streams","Amazon Data Firehose","Amazon SQS","Amazon SNS","AWS Glue"],
-   explain:{in:"Kinesis Data Streams 處理高吞吐、可重播的即時串流；SQS 不保留可重播串流。",del:"Data Firehose 全託管，近即時把串流資料遞送到 S3/Redshift。"},
+   explain:{in:"Kinesis Data Streams handles high-throughput, replayable streams; SQS does not retain a replayable stream.",del:"Data Firehose is fully managed delivery to S3/Redshift in near real time."},
    src:["https://docs.aws.amazon.com/streams/latest/dev/introduction.html","https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html"]},
 
-  {id:14,title:"S3 資料湖即席查詢",diff:3,base:800,
-   scenario:"資料放在 S3，想用標準 SQL 臨時查詢、不想架資料庫或叢集；查詢前需要一份表結構/中繼資料目錄。",
-   rows:[[F("Amazon S3 (資料湖)")],[S("cat","結構/中繼資料目錄")],[S("q","無伺服器 SQL 查詢")]],
-   answer:{cat:"AWS Glue Data Catalog",q:"Amazon Athena"},
-   hand:["AWS Glue Data Catalog","Amazon Athena","Amazon Redshift","Amazon RDS","Amazon EMR"],
-   explain:{cat:"Glue Data Catalog 保存表結構供查詢引擎使用。",q:"Athena 無伺服器、直接對 S3 用標準 SQL；Redshift 要先載入叢集。"},
-   src:["https://docs.aws.amazon.com/athena/latest/ug/what-is.html"]},
+  {id:4,cloud:"AWS",base:800,title:"HA web tier with DB failover",
+   scenario:"Design a resilient web app across two Availability Zones. Compute must scale with load, and the database must fail over automatically with near-zero downtime. Note: a Read Replica is for read scaling, not automatic failover.",
+   rows:[[F("Application Load Balancer")],[S("c","Auto-scaling compute")],[S("db","Auto-failover database")]],
+   answer:{c:"EC2 Auto Scaling",db:"RDS Multi-AZ"},
+   hand:["EC2 Auto Scaling","RDS Multi-AZ","RDS Read Replica","Single EC2 instance","Amazon S3"],
+   explain:{c:"Auto Scaling adjusts EC2 capacity across AZs by demand.",db:"RDS Multi-AZ keeps a synchronous standby and auto-fails over; a Read Replica does NOT auto-fail over — the classic trap."},
+   src:["https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html","https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html"]},
 
-  {id:15,title:"Web 應用安全層",diff:3,base:800,
-   scenario:"對外網站要擋 SQL injection、XSS 等第七層攻擊並全球加速。注意：Shield 主要擋 DDoS，不過濾應用層惡意請求。",
-   rows:[[F("使用者")],[S("cdn","全球加速 / CDN")],[S("waf","過濾第七層惡意請求")],[F("Application Load Balancer")]],
+  {id:5,cloud:"AWS",base:800,title:"Global edge with L7 protection",
+   scenario:"A public website must be globally accelerated and protected from layer-7 attacks (SQL injection, XSS). Note: Shield mainly mitigates DDoS, it does not filter malicious app-layer requests.",
+   rows:[[F("Users")],[S("cdn","Global CDN")],[S("waf","Layer-7 request filtering")],[F("Application Load Balancer")]],
    answer:{cdn:"Amazon CloudFront",waf:"AWS WAF"},
    hand:["Amazon CloudFront","AWS WAF","AWS Shield","Security Group","Amazon GuardDuty"],
-   explain:{cdn:"CloudFront 全球邊緣加速並可掛 WAF。",waf:"WAF 過濾 SQLi/XSS 等應用層攻擊；Shield 防 DDoS、GuardDuty 是威脅偵測。"},
+   explain:{cdn:"CloudFront accelerates globally at the edge and can attach WAF.",waf:"WAF filters SQLi/XSS at layer 7; Shield is DDoS, GuardDuty is threat detection."},
    src:["https://docs.aws.amazon.com/waf/latest/developerguide/what-is-aws-waf.html"]},
 
-  {id:16,title:"無伺服器容器",diff:3,base:800,
-   scenario:"要跑容器化服務、放在 ALB 後面，但不想自己管理 EC2 主機叢集（免管理底層伺服器）。",
-   rows:[[F("Application Load Balancer")],[S("orch","容器編排服務")],[S("compute","免管理主機的運算")]],
+  {id:6,cloud:"AWS",base:800,title:"Serverless 3-tier web app",
+   scenario:"Build a fully serverless app behind API Gateway: end-user sign-in, serverless compute, and a database that auto-scales with traffic. Note: IAM controls AWS account access (not app users); RDS exhausts connections under high Lambda concurrency.",
+   rows:[[F("Users")],[S("auth","End-user sign-in")],[F("API Gateway")],[S("fn","Serverless compute")],[S("db","Auto-scaling database")]],
+   answer:{auth:"Amazon Cognito",fn:"AWS Lambda",db:"Amazon DynamoDB"},
+   hand:["Amazon Cognito","AWS Lambda","Amazon DynamoDB","AWS IAM","Amazon RDS","Amazon EC2"],
+   explain:{auth:"Cognito handles app end-user sign-up/sign-in.",fn:"Lambda is the serverless compute tier.",db:"DynamoDB is serverless and auto-scaling — the best fit with Lambda."},
+   src:["https://aws.amazon.com/lambda/resources/refarch/refarch-webapp/"]},
+
+  {id:7,cloud:"AWS",base:800,title:"Run containers without managing servers",
+   scenario:"Run a containerized service behind an ALB, without provisioning or managing the EC2 host cluster yourself.",
+   rows:[[F("Application Load Balancer")],[S("orch","Container orchestration")],[S("compute","Serverless container compute")]],
    answer:{orch:"Amazon ECS",compute:"AWS Fargate"},
    hand:["Amazon ECS","AWS Fargate","Amazon EC2","AWS Lambda","Amazon EKS"],
-   explain:{orch:"ECS 負責容器編排。",compute:"Fargate 是無伺服器容器運算，免管理 EC2 主機；選 EC2 launch type 就要自己顧主機。"},
+   explain:{orch:"ECS orchestrates the containers.",compute:"Fargate is serverless container compute — no EC2 hosts to manage; the EC2 launch type means you manage hosts."},
    src:["https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html"]},
 
-  {id:17,title:"DynamoDB 微秒級快取",diff:3,base:800,
-   scenario:"DynamoDB 讀取已是毫秒級，但熱門資料要進一步降到微秒級、且要原生整合 DynamoDB。注意：ElastiCache 不是 DynamoDB 的原生快取。",
-   rows:[[F("Application")],[S("cache","微秒級、原生整合的快取")],[F("Amazon DynamoDB")]],
-   answer:{cache:"Amazon DynamoDB Accelerator (DAX)"},
-   hand:["Amazon DynamoDB Accelerator (DAX)","Amazon ElastiCache","Amazon CloudFront","Amazon S3"],
-   explain:{cache:"DAX 是 DynamoDB 原生記憶體快取，讀取降到微秒級；ElastiCache 非原生、需自行整合。"},
-   src:["https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html"]},
+  {id:8,cloud:"AWS",base:800,title:"Scale reads on a relational DB",
+   scenario:"A read-heavy relational workload overloads the primary database. Reduce read latency with an in-memory cache and offload read traffic to a replica. Note: a Multi-AZ standby is for HA, not read scaling.",
+   rows:[[F("Application")],[S("cache","In-memory cache")],[F("Amazon RDS (primary)")],[S("ro","Offload read traffic")]],
+   answer:{cache:"Amazon ElastiCache",ro:"RDS Read Replica"},
+   hand:["Amazon ElastiCache","RDS Read Replica","RDS Multi-AZ standby","Amazon S3","Amazon CloudFront"],
+   explain:{cache:"ElastiCache (Redis/Memcached) serves hot reads from memory.",ro:"Read Replicas scale read throughput; a Multi-AZ standby is for failover (HA), not scaling."},
+   src:["https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/WhatIs.html","https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html"]},
 
-  {id:18,title:"密鑰自動輪替",diff:3,base:800,
-   scenario:"應用程式要取得資料庫帳密，且要求每隔一段時間自動輪替密鑰。注意：Parameter Store 適合一般組態，原生自動輪替是另一個服務。",
-   rows:[[F("Application")],[S("sec","儲存並自動輪替密鑰")],[F("Amazon RDS")]],
-   answer:{sec:"AWS Secrets Manager"},
-   hand:["AWS Secrets Manager","AWS Systems Manager Parameter Store","AWS KMS","AWS IAM"],
-   explain:{sec:"Secrets Manager 內建密鑰自動輪替；Parameter Store 偏一般組態、KMS 是加密金鑰管理。"},
-   src:["https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html"]},
-
-  {id:19,title:"工作流程編排",diff:3,base:800,
-   scenario:"一筆訂單要依序經過多個 Lambda 步驟，需要可視化流程、自動重試與錯誤處理。",
-   rows:[[F("觸發")],[S("orch","可視化編排多步驟、含重試")],[F("多個 AWS Lambda")]],
+  {id:9,cloud:"AWS",base:800,title:"Orchestrate a multi-step workflow",
+   scenario:"An order must pass through several Lambda steps in sequence, with a visual flow, automatic retries and error handling.",
+   rows:[[F("Trigger")],[S("orch","Visual multi-step orchestration")],[F("Multiple AWS Lambda")]],
    answer:{orch:"AWS Step Functions"},
    hand:["AWS Step Functions","Amazon SQS","Amazon SNS","Amazon EventBridge"],
-   explain:{orch:"Step Functions 用狀態機編排多步驟、內建重試與錯誤處理；SQS/SNS 只是傳遞訊息。"},
+   explain:{orch:"Step Functions orchestrates multi-step state machines with built-in retries/error handling; SQS/SNS only pass messages."},
    src:["https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html"]},
 
-  {id:20,title:"混合雲專線",diff:3,base:800,
-   scenario:"地端資料中心要與 AWS 之間有穩定、低延遲、高頻寬的專用連線，且不想走公共網際網路。注意：VPN 走網際網路、延遲較不穩定。",
-   rows:[[F("地端資料中心")],[S("link","專用實體私有連線")],[F("AWS (VPC)")]],
-   answer:{link:"AWS Direct Connect"},
-   hand:["AWS Direct Connect","AWS Site-to-Site VPN","Internet Gateway","AWS Transit Gateway"],
-   explain:{link:"Direct Connect 是專用實體連線、繞過網際網路、延遲穩定；Site-to-Site VPN 走網際網路。"},
-   src:["https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html"]},
+  {id:10,cloud:"AWS",base:800,title:"Ad-hoc SQL on a data lake",
+   scenario:"Query data stored in S3 with standard SQL, with no database or cluster to manage. A schema/metadata catalog is required before querying.",
+   rows:[[F("Amazon S3 (data lake)")],[S("cat","Schema / metadata catalog")],[S("q","Serverless SQL query")]],
+   answer:{cat:"AWS Glue Data Catalog",q:"Amazon Athena"},
+   hand:["AWS Glue Data Catalog","Amazon Athena","Amazon Redshift","Amazon RDS","Amazon EMR"],
+   explain:{cat:"Glue Data Catalog stores table schema for query engines.",q:"Athena is serverless SQL directly on S3; Redshift requires loading a cluster."},
+   src:["https://docs.aws.amazon.com/athena/latest/ug/what-is.html"]},
+
+  /* ===================== GCP (11-20) ===================== */
+  {id:11,cloud:"GCP",base:800,title:"Decouple producers from workers",
+   scenario:"Ingest a high volume of events and process them asynchronously with a serverless worker, decoupling producers from consumers.",
+   rows:[[F("Producer service")],[S("msg","Async messaging")],[S("w","Serverless worker")]],
+   answer:{msg:"Pub/Sub",w:"Cloud Functions"},
+   hand:["Pub/Sub","Cloud Functions","Cloud Tasks","Memorystore","Compute Engine"],
+   explain:{msg:"Pub/Sub is GCP's scalable async messaging for decoupling/streaming; Cloud Tasks is for explicit, rate-controlled task dispatch.",w:"Cloud Functions runs serverless code triggered by Pub/Sub."},
+   src:["https://cloud.google.com/pubsub/docs/overview","https://cloud.google.com/functions/docs"]},
+
+  {id:12,cloud:"GCP",base:800,title:"Highly available web tier (GCP)",
+   scenario:"Design a resilient web app: a global entry point distributing traffic, compute that scales with load across zones, and a managed relational database with high availability. Note: a read replica is for scaling, not HA failover.",
+   rows:[[F("Users")],[S("lb","Global L7 load balancing")],[S("c","Auto-scaling compute")],[S("db","HA managed SQL database")]],
+   answer:{lb:"Cloud Load Balancing",c:"Managed Instance Group",db:"Cloud SQL (HA)"},
+   hand:["Cloud Load Balancing","Managed Instance Group","Cloud SQL (HA)","Single Compute Engine VM","Cloud SQL read replica"],
+   explain:{lb:"Global external Application Load Balancer fronts the app on one anycast IP.",c:"A Managed Instance Group autoscales VMs across zones.",db:"Cloud SQL HA uses a regional standby with automatic failover; a read replica only scales reads."},
+   src:["https://cloud.google.com/load-balancing/docs/load-balancing-overview","https://cloud.google.com/compute/docs/autoscaler","https://cloud.google.com/sql/docs/mysql/high-availability"]},
+
+  {id:13,cloud:"GCP",base:800,title:"Streaming analytics pipeline (GCP)",
+   scenario:"Ingest streaming events, transform them in-flight, and load them into a serverless data warehouse for SQL analytics.",
+   rows:[[F("Event sources")],[S("ingest","Streaming ingestion")],[S("etl","Stream processing / ETL")],[S("dw","Serverless data warehouse")]],
+   answer:{ingest:"Pub/Sub",etl:"Dataflow",dw:"BigQuery"},
+   hand:["Pub/Sub","Dataflow","BigQuery","Cloud Bigtable","Cloud Storage"],
+   explain:{ingest:"Pub/Sub ingests the event stream.",etl:"Dataflow does unified stream/batch processing.",dw:"BigQuery is the serverless SQL data warehouse for analytics."},
+   src:["https://cloud.google.com/pubsub/docs/overview","https://cloud.google.com/dataflow/docs/overview","https://cloud.google.com/bigquery/docs/introduction"]},
+
+  {id:14,cloud:"GCP",base:800,title:"Serverless SQL over a data lake (GCP)",
+   scenario:"Store large raw data and run standard SQL analytics over it with no cluster to manage. Pick the object storage layer and the serverless warehouse — not a self-managed cluster.",
+   rows:[[F("Raw data")],[S("store","Object storage data lake")],[S("q","Serverless SQL warehouse")]],
+   answer:{store:"Cloud Storage",q:"BigQuery"},
+   hand:["Cloud Storage","BigQuery","Dataproc cluster","Cloud SQL","Filestore"],
+   explain:{store:"Cloud Storage is the object data lake.",q:"BigQuery is serverless SQL analytics; Dataproc is a managed Hadoop/Spark cluster you must size."},
+   src:["https://cloud.google.com/storage/docs/introduction","https://cloud.google.com/bigquery/docs/introduction"]},
+
+  {id:15,cloud:"GCP",base:800,title:"Massive low-latency NoSQL (GCP)",
+   scenario:"Store time-series / IoT data with millions of writes per second and single-digit-millisecond reads at huge scale (wide-column). Choose the right database, not a document or relational store.",
+   rows:[[F("High-throughput writes")],[S("db","Wide-column NoSQL at scale")]],
+   answer:{db:"Cloud Bigtable"},
+   hand:["Cloud Bigtable","Firestore","Cloud SQL","BigQuery"],
+   explain:{db:"Bigtable is wide-column, high-throughput, low-latency at massive scale; Firestore is document, Cloud SQL is relational, BigQuery is analytics."},
+   src:["https://cloud.google.com/bigtable/docs/overview"]},
+
+  {id:16,cloud:"GCP",base:800,title:"Serverless web app (GCP)",
+   scenario:"Build a serverless app: end-user authentication, request-driven serverless container compute, and a serverless document database. Note: Cloud IAM is for account-level permissions, not app end-users.",
+   rows:[[F("Users")],[S("auth","End-user authentication")],[S("compute","Serverless container compute")],[S("db","Serverless document DB")]],
+   answer:{auth:"Identity Platform",compute:"Cloud Run",db:"Firestore"},
+   hand:["Identity Platform","Cloud Run","Firestore","Cloud IAM","Cloud SQL","Compute Engine"],
+   explain:{auth:"Identity Platform handles app end-user auth (incl. social logins).",compute:"Cloud Run runs serverless containers on demand.",db:"Firestore is the serverless document database."},
+   src:["https://cloud.google.com/identity-platform/docs","https://cloud.google.com/run/docs/overview/what-is-cloud-run","https://cloud.google.com/firestore/docs/overview"]},
+
+  {id:17,cloud:"GCP",base:800,title:"Managed Kubernetes without node ops",
+   scenario:"You need full Kubernetes capabilities but don't want to manage nodes, scaling or node security yourself. Pick the platform and the right mode of operation.",
+   rows:[[F("Global load balancer")],[S("orch","Managed Kubernetes")],[S("mode","Hands-off node management")]],
+   answer:{orch:"Google Kubernetes Engine (GKE)",mode:"GKE Autopilot"},
+   hand:["Google Kubernetes Engine (GKE)","GKE Autopilot","Compute Engine","Cloud Run","GKE Standard"],
+   explain:{orch:"GKE is managed Kubernetes; Cloud Run is not full Kubernetes.",mode:"Autopilot manages nodes/scaling/security for you; Standard mode means you manage the nodes."},
+   src:["https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview"]},
+
+  {id:18,cloud:"GCP",base:800,title:"Scale reads on Cloud SQL",
+   scenario:"A read-heavy relational workload overloads Cloud SQL. Add an in-memory cache and offload reads to a replica. Note: an HA standby is for failover, not read scaling.",
+   rows:[[F("Application")],[S("cache","In-memory cache")],[F("Cloud SQL (primary)")],[S("ro","Offload read traffic")]],
+   answer:{cache:"Memorystore",ro:"Cloud SQL read replica"},
+   hand:["Memorystore","Cloud SQL read replica","Cloud SQL HA standby","Cloud Storage","Cloud CDN"],
+   explain:{cache:"Memorystore (Redis) serves hot reads from memory.",ro:"Read replicas scale reads; the HA standby is for failover, not scaling."},
+   src:["https://cloud.google.com/memorystore/docs/redis/memorystore-for-redis-overview","https://cloud.google.com/sql/docs/mysql/replication"]},
+
+  {id:19,cloud:"GCP",base:800,title:"Serverless workflow orchestration (GCP)",
+   scenario:"Coordinate multiple Cloud Run services / APIs in a defined sequence with retries and error handling, fully serverless. Note: Cloud Composer (Airflow) is heavier, aimed at complex data pipelines.",
+   rows:[[F("Trigger")],[S("orch","Serverless step orchestration")],[F("Cloud Run / APIs")]],
+   answer:{orch:"Workflows"},
+   hand:["Workflows","Cloud Composer","Pub/Sub","Cloud Tasks"],
+   explain:{orch:"Workflows is serverless orchestration of services/APIs in a defined order, with retries; Composer is managed Airflow for heavier pipelines."},
+   src:["https://cloud.google.com/workflows/docs/overview"]},
+
+  {id:20,cloud:"GCP",base:800,title:"Global static content delivery (GCP)",
+   scenario:"Serve a global static website / assets with edge caching and low latency.",
+   rows:[[F("Users")],[S("cdn","Edge cache / CDN")],[S("store","Static object storage")]],
+   answer:{cdn:"Cloud CDN",store:"Cloud Storage"},
+   hand:["Cloud CDN","Cloud Storage","Persistent Disk","Filestore","Memorystore"],
+   explain:{cdn:"Cloud CDN caches content at Google's edge PoPs.",store:"Cloud Storage holds the static objects served via the load balancer + Cloud CDN."},
+   src:["https://cloud.google.com/cdn/docs/overview","https://cloud.google.com/storage/docs/introduction"]},
 ];
 function slotCount(p){return Object.keys(p.answer).length;}
-function roundSecs(p){return 20+(slotCount(p)-1)*5;}  // 20s起，每多一格+5s
+function roundSecs(p){return 20+(slotCount(p)-1)*5;}
 
-/* ---------- 狀態 ---------- */
+/* ---------- state ---------- */
 let player="", total=0, offset=0;
 let curRound=-1, finalized=false, revealedFor=-1, endedShown=false;
 let startMs=0, durMs=0, placed=0, wrongCnt=0, completeLeft=0, scoreThis=0, sel=null, rafId=0;
@@ -327,35 +343,32 @@ function esc(s){return String(s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&'
 
 $('#joinBtn').onclick=()=>{
   const n=$('#name').value.trim();
-  if(!n){toast('請先輸入暱稱',false);return;}
+  if(!n){toast('Enter a nickname first',false);return;}
   player=n; total=0; $('#score').textContent='0';
-  $('#hello').innerHTML='哈囉，<span>'+esc(n)+'</span>';
-  submit();                 // 先登記名字（0分）到排行榜
+  $('#hello').innerHTML='Hi, <span>'+esc(n)+'</span>';
+  submit();
   show('lobby');
   poll(); setInterval(poll,1200);
 };
 $('#info').onclick=()=>{const p=PUZZLES[curRound];if(!p)return;$('#mbody').textContent=p.scenario;$('#modal').classList.add('on');};
 
-/* ---------- 輪詢狀態 ---------- */
 function poll(){ jsonp(API_URL+'?action=state', st=>{ if(st) handleState(st); }); }
 function handleState(st){
   offset = st.serverNow - Date.now();
-  if(st.phase==='lobby'){ if(curRound!==-1){curRound=-1;} if(!$('#lobby').classList.contains('on')&&!$('#ended').classList.contains('on'))show('lobby'); }
+  if(st.phase==='lobby'){ if(curRound!==-1)curRound=-1; if(!$('#lobby').classList.contains('on')&&!$('#ended').classList.contains('on'))show('lobby'); }
   else if(st.phase==='question'){ if(st.round!==curRound) beginRound(st.round, st.startMs, st.duration); }
   else if(st.phase==='reveal'){ if(revealedFor!==st.round) doReveal(st.round); }
   else if(st.phase==='ended'){ if(!endedShown) endGame(); }
 }
 
-/* ---------- 開始一題 ---------- */
 function beginRound(round,sMs,durSec){
   curRound=round; revealedFor=-1; finalized=false; placed=0; wrongCnt=0; scoreThis=0; sel=null;
   startMs=sMs; durMs=(durSec||roundSecs(PUZZLES[round]))*1000;
   const p=PUZZLES[round];
   $('#pno').textContent=p.id;
   $('#ptitle').textContent=p.title;
-  $('#pdiff').innerHTML='難度：<b>'+['','入門','架構模式','進階取捨'][p.diff]+'</b>　底分 '+p.base+'　空格 '+slotCount(p);
+  $('#pdiff').innerHTML='<span class="badge '+(p.cloud==='AWS'?'aws':'gcp')+'">'+p.cloud+'</span> Architecture Design · '+slotCount(p)+' slots';
   $('#lockmask').classList.remove('on');
-  // board
   const b=$('#board'); b.querySelectorAll('.row,.arrow').forEach(e=>e.remove());
   const mask=$('#lockmask');
   p.rows.forEach((row,ri)=>{
@@ -364,12 +377,11 @@ function beginRound(round,sMs,durSec){
     row.forEach(cell=>{
       const el=document.createElement('div');
       if(cell.t==='f'){el.className='node';el.textContent=cell.label;}
-      else{el.className='slot';el.dataset.slot=cell.id;el.innerHTML='填入服務'+(cell.hint?('<span class="hint">'+cell.hint+'</span>'):'');el.onclick=()=>placeOn(cell.id,el);}
+      else{el.className='slot';el.dataset.slot=cell.id;el.innerHTML='Tap to fill'+(cell.hint?('<span class="hint">'+cell.hint+'</span>'):'');el.onclick=()=>placeOn(cell.id,el);}
       r.appendChild(el);
     });
     b.insertBefore(r,mask);
   });
-  // hand
   const h=$('#hand');h.innerHTML='';
   shuffle(p.hand.slice()).forEach(name=>{
     const c=document.createElement('div');c.className='gcard';c.textContent=name;c.dataset.card=name;
@@ -382,8 +394,7 @@ function beginRound(round,sMs,durSec){
 
 function tick(){
   const now=Date.now()+offset;
-  let left=startMs+durMs-now;
-  if(left<0)left=0;
+  let left=startMs+durMs-now; if(left<0)left=0;
   const frac=durMs?left/durMs:0;
   $('#tbar').style.width=(frac*100)+'%';
   $('#tbar').style.background=frac>.5?'linear-gradient(90deg,#1db954,#37d36a)':frac>.25?'linear-gradient(90deg,#ff9900,#ffb84d)':'linear-gradient(90deg,#e3463a,#ff6a5e)';
@@ -392,10 +403,9 @@ function tick(){
   rafId=requestAnimationFrame(tick);
 }
 
-/* ---------- 放卡 ---------- */
 function placeOn(slotId,el){
   if(finalized||el.classList.contains('filled'))return;
-  if(!sel){toast('先點選一張手牌',false);return;}
+  if(!sel){toast('Pick a card first',false);return;}
   const p=PUZZLES[curRound];
   if(p.answer[slotId]===sel){
     el.classList.add('filled');el.innerHTML='✓ '+sel;el.onclick=null;
@@ -404,32 +414,28 @@ function placeOn(slotId,el){
     if(placed===slotCount(p)){completeLeft=Math.max(0,startMs+durMs-(Date.now()+offset));finalizeRound(true);}
   }else{
     wrongCnt++;el.classList.add('bad');setTimeout(()=>el.classList.remove('bad'),300);
-    document.querySelectorAll('.gcard').forEach(x=>x.classList.remove('sel'));sel=null;beep(false);toast('放錯了，扣分',false);
+    document.querySelectorAll('.gcard').forEach(x=>x.classList.remove('sel'));sel=null;beep(false);toast('Wrong — points deducted',false);
   }
 }
 
-/* ---------- 結算一題 ---------- */
 function finalizeRound(done){
   if(finalized)return; finalized=true; cancelAnimationFrame(rafId);
   const p=PUZZLES[curRound], T=slotCount(p);
-  let sc;
-  if(done){ sc=Math.round(p.base*0.6 + p.base*0.4*(completeLeft/durMs)); }
-  else { sc=Math.round(p.base*0.5*placed/T); }
+  let sc = done ? Math.round(p.base*0.6 + p.base*0.4*(completeLeft/durMs)) : Math.round(p.base*0.5*placed/T);
   sc=Math.max(0, sc - wrongCnt*40);
   scoreThis=sc; total+=sc; $('#score').textContent=total;
   roundLog.push({id:p.id,title:p.title,sc,done,placed,T});
   submit();
-  $('#lockttl').textContent=done?'完成！':'時間到';
+  $('#lockttl').textContent=done?'Done!':"Time's up";
   $('#lockscore').textContent='+'+sc;
-  $('#lockmsg').textContent=done?'等待其他人與揭曉…':(placed+'/'+T+' 格正確');
+  $('#lockmsg').textContent=done?'Waiting for others…':(placed+'/'+T+' correct');
   $('#lockmask').classList.add('on');
 }
 
-/* ---------- 揭曉 ---------- */
 function doReveal(round){
   revealedFor=round; const p=PUZZLES[round];
-  if(curRound!==round){curRound=round;}      // 防止中途加入者
-  $('#revt').textContent='第 '+p.id+' 題 · '+p.title;
+  if(curRound!==round)curRound=round;
+  $('#revt').textContent='Q'+p.id+' · '+p.title;
   const ab=$('#ansbox');ab.innerHTML='';
   Object.keys(p.answer).forEach(k=>{
     const d=document.createElement('div');d.className='ans';
@@ -437,33 +443,31 @@ function doReveal(round){
     ab.appendChild(d);
   });
   const s=document.createElement('div');s.className='src';
-  s.innerHTML='官方來源：'+p.src.map(u=>'<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>').join('<br>');
+  s.innerHTML='Docs: '+p.src.map(u=>'<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>').join('<br>');
   ab.appendChild(s);
-  $('#myresult').textContent='本題 +'+scoreThis;
+  $('#myresult').textContent='This round +'+scoreThis;
   jsonp(API_URL+'?action=top',rows=>{
     if(!rows){$('#myrank').textContent='';return;}
     rows.sort((a,b)=>b.score-a.score);
     const i=rows.findIndex(r=>r.name===player);
-    $('#myrank').textContent=i>=0?('目前第 '+(i+1)+' 名 / '+rows.length+' 人'):('總分 '+total);
+    $('#myrank').textContent=i>=0?('Rank '+(i+1)+' / '+rows.length):('Score '+total);
   });
   show('reveal');
 }
 
-/* ---------- 結束 ---------- */
 function endGame(){
   endedShown=true;
   $('#finalScore').textContent=total;
   jsonp(API_URL+'?action=top',rows=>{
     if(rows){rows.sort((a,b)=>b.score-a.score);const i=rows.findIndex(r=>r.name===player);
-      $('#finalRank').textContent=i>=0?('🏅 第 '+(i+1)+' 名 / '+rows.length+' 人'):('總分 '+total);}
+      $('#finalRank').textContent=i>=0?('🏅 Rank '+(i+1)+' / '+rows.length):('Score '+total);}
   });
   const rl=$('#reslist');rl.innerHTML='';
   roundLog.forEach(r=>{const d=document.createElement('div');d.className='myrow';d.style.fontSize='14px';d.style.marginTop='8px';
-    d.innerHTML='<span>第'+r.id+'題 '+esc(r.title)+'</span><span class="g">+'+r.sc+'</span>';rl.appendChild(d);});
+    d.innerHTML='<span>Q'+r.id+' '+esc(r.title)+'</span><span class="g">+'+r.sc+'</span>';rl.appendChild(d);});
   show('ended');
 }
 
-/* ---------- 後端 ---------- */
 function submit(){
   if(API_URL.indexOf('PASTE_')===0){console.log('[demo] '+player+' = '+total);return;}
   jsonp(API_URL+'?action=submit&name='+encodeURIComponent(player)+'&score='+total,()=>{});
@@ -479,8 +483,8 @@ function jsonp(url,cb){
 }
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-/* ---------- 單機示範（沒設定網址時可一個人測流程） ---------- */
-let demoRound=0,demoPhase='lobby',demoStart=0;
+/* ---------- single-player demo when URL not set ---------- */
+let demoRound=0,demoPhase='lobby',demoStart=0,demoRevAt=0;
 function demoState(url,cb){
   if(url.indexOf('action=state')>=0){
     if(demoPhase==='lobby'){setTimeout(()=>{demoPhase='question';demoStart=Date.now();},1500);}
@@ -490,7 +494,6 @@ function demoState(url,cb){
   } else if(url.indexOf('action=top')>=0){ cb&&cb([{name:player,score:total}]); }
   else { cb&&cb({ok:true}); }
 }
-let demoRevAt=0;
 </script>
 </body>
 </html>
